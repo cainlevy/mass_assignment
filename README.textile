@@ -1,8 +1,8 @@
-h1. MassAssignment
+h2. MassAssignment
 
 Copyright (c) 2009 Lance Ivy, released under the MIT license
 
-h2. What It Is
+h3. What It Is
 
 A robust mass assignment method with a small and obvious syntax.
 
@@ -20,10 +20,11 @@ This plugin's solution is to let you specify an obvious list of allowed attribut
 
 And as a bonus, permission plugins have a much easier time of things. The list of allowed attributes may be pulled from a permissions table without any awkward User.current class or thread variables.
 
-h2. Example
+h3. Example
 
 Let's take a very plausible situation where you would want three separate lists of allowed attributes. You have users that sign up to your application. But after they have signed up, they may not change their username. Admins, however, may manually change a username as needed.
 
+bc..
   class UsersController < ApplicationController
     def create
       @user = User.new
@@ -32,6 +33,7 @@ Let's take a very plausible situation where you would want three separate lists 
       @user.save!
       ...
     end
+
     def update
       @user = User.find(params[:id])
       # username is no longer accepted later
@@ -43,6 +45,7 @@ Let's take a very plausible situation where you would want three separate lists 
 
   class Admin::UsersController < ApplicationController
     before_filter :admin_required
+
     def update
       @user = User.find(params[:id])
       # admins, on the other hand, may change the username as needed, but may not set passwords
@@ -52,7 +55,7 @@ Let's take a very plausible situation where you would want three separate lists 
     end
   end
 
-h2. Feedback
+h3. Feedback
 
 I can think of a couple alternate implementations for this API. Consider:
 
