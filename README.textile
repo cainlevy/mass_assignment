@@ -1,5 +1,8 @@
-MassAssignment
-==========
+h1. MassAssignment
+
+Copyright (c) 2009 Lance Ivy, released under the MIT license
+
+h2. What It Is
 
 A robust mass assignment method with a small and obvious syntax.
 
@@ -17,22 +20,7 @@ This plugin's solution is to let you specify an obvious list of allowed attribut
 
 And as a bonus, permission plugins have a much easier time of things. The list of allowed attributes may be pulled from a permissions table without any awkward User.current class or thread variables.
 
-Feedback
-========
-
-I can think of a couple alternate implementations for this API. Consider:
-
-  @user.assign(params[:user], [:username, :email])
-
-vs
-
-  @user.assign(params[:user], :only => [:username, :email])
-  @user.assign(params[:user], :except => [:admin])
-  
-I personally prefer the former because I think that blacklists are inherently less safe than whitelists, with no compensating advantage. But I'd love to hear some other use cases and get feedback on this! Fork this repo and send pull requests or just contact me (github.com/cainlevy). Let's talk.
-
-Example
-=======
+h2. Example
 
 Let's take a very plausible situation where you would want three separate lists of allowed attributes. You have users that sign up to your application. But after they have signed up, they may not change their username. Admins, however, may manually change a username as needed.
 
@@ -66,4 +54,15 @@ Let's take a very plausible situation where you would want three separate lists 
     end
   end
 
-Copyright (c) 2009 Lance Ivy, released under the MIT license
+h2. Feedback
+
+I can think of a couple alternate implementations for this API. Consider:
+
+  @user.assign(params[:user], [:username, :email])
+
+vs
+
+  @user.assign(params[:user], :only => [:username, :email])
+  @user.assign(params[:user], :except => [:admin])
+  
+I personally prefer the former because I think that blacklists are inherently less safe than whitelists, with no compensating advantage. But I'd love to hear some other use cases and get feedback on this! Fork this repo and send pull requests or just contact me (github.com/cainlevy). Let's talk.
