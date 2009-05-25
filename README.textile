@@ -32,7 +32,6 @@ Let's take a very plausible situation where you would want three separate lists 
       @user.save!
       ...
     end
-
     def update
       @user = User.find(params[:id])
       # username is no longer accepted later
@@ -44,7 +43,6 @@ Let's take a very plausible situation where you would want three separate lists 
 
   class Admin::UsersController < ApplicationController
     before_filter :admin_required
-    
     def update
       @user = User.find(params[:id])
       # admins, on the other hand, may change the username as needed, but may not set passwords
