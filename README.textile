@@ -24,7 +24,7 @@ h3. Example
 
 Let's take a very plausible situation where you would want three separate lists of allowed attributes. You have users that sign up to your application. But after they have signed up, they may not change their username. Admins, however, may manually change a username as needed.
 
-bc..
+<pre><code>
 class UsersController < ApplicationController
   def create
     @user = User.new
@@ -54,18 +54,17 @@ class Admin::UsersController < ApplicationController
     ...
   end
 end
+</pre></code>
 
 h3. Feedback
 
 I can think of a couple alternate implementations for this API. Consider:
 
-bc.
-@user.assign(params[:user], [:username, :email])
+  @user.assign(params[:user], [:username, :email])
 
 vs
 
-bc.
-@user.assign(params[:user], :only => [:username, :email])
-@user.assign(params[:user], :except => [:admin])
+  @user.assign(params[:user], :only => [:username, :email])
+  @user.assign(params[:user], :except => [:admin])
   
 I personally prefer the former because I think that blacklists are inherently less safe than whitelists, with no compensating advantage. But I'd love to hear some other use cases and get feedback on this! Fork this repo and send pull requests or just contact me (github.com/cainlevy). Let's talk.
