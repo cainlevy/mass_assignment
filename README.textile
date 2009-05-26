@@ -2,6 +2,8 @@ h2. MassAssignment
 
 Copyright (c) 2009 Lance Ivy, released under the MIT license
 
+From initial discussion at http://groups.google.com/group/rubyonrails-core/browse_thread/thread/3b6818496d0d07f1
+
 h3. What It Is
 
 A robust mass assignment method with a small and obvious syntax.
