@@ -8,7 +8,7 @@ h3. What It Is
 
 A robust mass assignment method with a small and obvious syntax.
 
-The normal mass assignment protection comes from attr_protected and attr_accessible. There are a many problems with this approach:
+The normal mass assignment protection comes from attr_protected and attr_accessible. There are a few problems with this approach:
 
 * Often never implemented, leaving a wide-open system. And once implemented, easy to forget when adding new attributes, leading to bugs (in an attr_accessible system) or security holes (in an attr_protected system).
 * Restricts coding syntax. You can't easily use update_attributes() or attributes= because your whitelist/blacklist gets in your own way.
@@ -22,41 +22,60 @@ This plugin's solution is to let you specify an obvious list of allowed attribut
 
 And as a bonus, permission plugins have a much easier time of things. The list of allowed attributes may be pulled from a permissions table without any awkward User.current class or thread variables.
 
+For those who would still like attr_protected- and attr_accessible-like functionality, this plugin offers mass assignment policies. You may choose to a default mass assignment protection as open or closed as you like using familiar :only/:except syntax. But you may also specify regular expressions such as /_id$/ to reject all id fields by default, and since these policies inherit, you may set them globally on ActiveRecord::Base. See the examples below.
+
 h3. Example
 
 Let's take a very plausible situation where you would want three separate lists of allowed attributes. You have users that sign up to your application. But after they have signed up, they may not change their username. Admins, however, may manually change a username as needed.
 
 <pre><code>
-class UsersController < ApplicationController
-  def create
-    @user = User.new
-    # during signup a user may pick a username
-    @user.assign(params[:user], [:username, :email, :password, :password_confirmation])
-    @user.save!
-    ...
+  class UsersController < ApplicationController
+    def create
+      @user = User.new
+      # during signup a user may pick a username
+      @user.assign(params[:user], [:username, :email, :password, :password_confirmation])
+      @user.save!
+      ...
+    end
+
+    def update
+      @user = User.find(params[:id])
+      # username is no longer accepted later
+      @user.assign(params[:user], [:email, :password, :password_confirmation])
+      @user.save!
+      ...
+    end
   end
 
-  def update
-    @user = User.find(params[:id])
-    # username is no longer accepted later
-    @user.assign(params[:user], [:email, :password, :password_confirmation])
-    @user.save!
-    ...
-  end
-end
+  class Admin::UsersController < ApplicationController
+    before_filter :admin_required
 
-class Admin::UsersController < ApplicationController
-  before_filter :admin_required
-
-  def update
-    @user = User.find(params[:id])
-    # admins, on the other hand, may change the username as needed, but may not set passwords
-    @user.assign(:params[:user], [:username, :email])
-    @user.save!
-    ...
+    def update
+      @user = User.find(params[:id])
+      # admins, on the other hand, may change the username as needed, but may not set passwords
+      @user.assign(:params[:user], [:username, :email])
+      @user.save!
+      ...
+    end
   end
-end
 </pre></code>
+
+If you don't always want to set attribute lists, you may use the mass_assignment_policy API to configure defaults whitelists or blacklists.
+
+<pre><code>
+  class User < ActiveRecord::Base
+    # The boring usage. You may as well specify attributes at calltime.    
+    mass_assignment_policy :only => [:email, :username]
+    
+    # More interesting. No id fields!
+    mass_assignment_policy :except => /_id$/
+  end
+  
+  # Hardcore. Disables mass assignment globally unless overridden!
+  ActiveRecord::Base.mass_assignment_policy :except => :all
+</pre></code>
+
+Note that mass_assignment_policy only applies to usage of methods supplied in this plugin.
 
 h3. Feedback
 
