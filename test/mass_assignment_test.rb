@@ -34,6 +34,13 @@ class MassAssignmentTest < ActiveSupport::TestCase
     @attributes = {"name" => "Bob", "email" => "bob@example.com"}
     ActiveRecord::Base.logger = stub('debug' => true)
   end
+  
+  test "assigning nothing" do
+    params = {}
+    assert_nothing_raised do
+      @user.assign(params[:user])
+    end
+  end
 
   test "assigning attributes" do
     @user.assign(@attributes)

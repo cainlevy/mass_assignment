@@ -4,6 +4,8 @@ module MassAssignment
   end
 
   def assign(attributes, allowed_attributes = nil)
+    return unless attributes
+  
     if allowed_attributes
       safe_attributes = filter_attributes(attributes, :only => allowed_attributes)
       self.send("attributes=", safe_attributes, false)
