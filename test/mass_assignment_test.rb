@@ -10,6 +10,14 @@ class User < ActiveRecord::Base
       ]
     end
   end
+  
+  def friend
+    @friend ||= User.new
+  end
+  
+  def friend_attributes=(attributes)
+    friend.attributes = attributes
+  end
 end
 
 class ProtectedUser < User
@@ -64,6 +72,12 @@ class MassAssignmentTest < ActiveSupport::TestCase
     @user.assign(@attributes.merge(:role_id => 1), [:name, :email])
     assert_equal "Bob", @user.name
     assert_nil @user.role_id
+  end
+  
+  test "nested assignment" do
+    @user.assign(@attributes.merge(:friend_attributes => {:name => 'Joe', :role_id => 1}), [:name, :role_id, {:friend_attributes => [:name]}])
+    assert_equal "Joe", @user.friend.name
+    assert_nil @user.friend.role_id
   end
 end
 

@@ -31,7 +31,13 @@ module MassAssignment
       elsif options[:only] == :all
         attributes
       else
-        whitelist = options[:only].map(&:to_s)
+        whitelist = options[:only].map{|i| i.is_a?(Hash) ? i.keys.first.to_s : i.to_s}
+        options[:only].each do |i|
+          next unless i.is_a? Hash
+          name = i.keys.first.to_s
+          next unless attributes[name].is_a? Hash
+          attributes[name] = filter_attributes(attributes[name], :only => i.values.first)
+        end
         attributes.reject { |k, v| !whitelist.include?(k.gsub(/\(.+/, "")) }
       end
     elsif options[:except]
