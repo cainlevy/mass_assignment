@@ -3,6 +3,25 @@ module MassAssignment
     base.class_eval do extend ClassMethods end
   end
 
+  # Basic Example:
+  #
+  #   @user = User.new
+  #   @user.assign(params[:user], [:username, :email, :password, :password_confirmation])
+  #   @user.save!
+  #
+  # Nested Assignment:
+  #
+  #   @user = User.find_by_id(params[:id])
+  #   @user.assign(params[:user], [:username, :email, {:dog_attributes => [:id, :_destroy, :name, :color]}])
+  #   @user.save!
+  #
+  # Deep Assignment:
+  #
+  #   @user = User.find_by_id(params[:id])
+  #   @user.assign(params[:user], [:username, :email]) do |user_params|
+  #     @user.dog.assign(user_params[:dog], [:name, :color])
+  #   end
+  #   @user.save!
   def assign(attributes, allowed_attributes = nil, &block)
     return unless attributes
   

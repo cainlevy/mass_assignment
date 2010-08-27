@@ -58,7 +58,7 @@ Let's take a very plausible situation where you would want three separate lists 
       ...
     end
   end
-</pre></code>
+</code></pre>
 
 If you don't always want to set attribute lists, you may use the mass_assignment_policy API to configure defaults whitelists or blacklists.
 
@@ -73,9 +73,47 @@ If you don't always want to set attribute lists, you may use the mass_assignment
   
   # Hardcore. Disables mass assignment globally unless overridden!
   ActiveRecord::Base.mass_assignment_policy :except => :all
-</pre></code>
+</code></pre>
 
 Note that mass_assignment_policy only applies to usage of methods supplied in this plugin.
+
+h3. Nested Assignment
+
+Nested assignment is supported by passing hashes and arrays for the whitelist.
+
+<pre><code>
+  class Pirate < ActiveRecord::Base
+    accepts_nested_attributes_for :ships
+  end
+  
+  class PiratesController < ApplicationController
+    def update
+      @pirate = Pirate.find(params[:id])
+      @pirate.assign(params[:pirate], [:name, :eyepatch, {:ships_attributes => [:id, :_destroy, :name, :cannons, :capacity]}])
+      @pirate.save!
+      ...
+    end
+  end
+</code></pre>
+
+As you can see, the punctuation gets messy. I'm interested in better options.
+
+h3. Deep Assignment
+
+Sometimes nested assignment isn't completely appropriate but you still need to assign attributes to associated objects. Try the block syntax:
+
+<pre><code>
+  class ShipsController < ApplicationController
+    def update
+      @ship = Ship.find(params[:id])
+      @ship.assign(params[:ship], [:name, :cannons, :capacity]) do |ship_params|
+        @ship.pirate.assign(ship_params[:pirate], [:name, :eyepatch])
+      end
+    end
+  end
+</code></pre>
+
+The major benefit here is that the block won't yield unless the params exist, so you don't need to check 'if params[:ship] && params[:ship][:pirate]'.
 
 h3. Feedback
 
