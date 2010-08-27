@@ -79,6 +79,14 @@ class MassAssignmentTest < ActiveSupport::TestCase
     assert_equal "Joe", @user.friend.name
     assert_nil @user.friend.role_id
   end
+  
+  test "deep assignment" do
+    @user.assign(@attributes.merge(:friend => {:name => 'Joe', :role_id => 1}), [:name, :role_id]) do |params|
+      @user.friend.assign(params[:friend], [:name])
+    end
+    assert_equal "Joe", @user.friend.name
+    assert_nil @user.friend.role_id
+  end
 end
 
 class MassAssignmentPolicyTest < ActiveSupport::TestCase

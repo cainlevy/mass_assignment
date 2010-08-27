@@ -3,11 +3,12 @@ module MassAssignment
     base.class_eval do extend ClassMethods end
   end
 
-  def assign(attributes, allowed_attributes = nil)
+  def assign(attributes, allowed_attributes = nil, &block)
     return unless attributes
   
     if allowed_attributes
       safe_attributes = filter_attributes(attributes, :only => allowed_attributes)
+      yield attributes if block_given?
       self.send("attributes=", safe_attributes, false)
     else
       if policy = self.class.get_mass_assignment_policy
