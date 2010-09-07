@@ -23,7 +23,7 @@ module MassAssignment
   #   end
   #   @user.save!
   def assign(attributes, allowed_attributes = nil, &block)
-    return unless attributes
+    return unless attributes and attributes.is_a? Hash
   
     if allowed_attributes
       safe_attributes = filter_attributes(attributes, :only => allowed_attributes)

@@ -49,6 +49,13 @@ class MassAssignmentTest < ActiveSupport::TestCase
       @user.assign(params[:user])
     end
   end
+  
+  test "assigning a string" do
+    params = {:user => "well this is embarrassing"}
+    assert_nothing_raised do
+      @user.assign(params[:user])
+    end
+  end
 
   test "assigning attributes" do
     @user.assign(@attributes)
