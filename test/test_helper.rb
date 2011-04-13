@@ -7,6 +7,6 @@ require 'active_record'
 
 PLUGIN_ROOT = File.dirname(__FILE__) + '/../'
 ActiveSupport::Dependencies.autoload_paths << File.join(PLUGIN_ROOT, 'lib')
-require 'init'
+require 'rails/init'
 
 require 'mocha'

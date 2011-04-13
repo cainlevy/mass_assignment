@@ -1,4 +1,6 @@
 module MassAssignment
+  VERSION = '1.0.0'
+
   def self.included(base)
     base.class_eval do extend ClassMethods end
   end
