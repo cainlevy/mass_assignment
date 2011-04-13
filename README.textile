@@ -8,17 +8,22 @@ h3. What It Is
 
 A robust mass assignment method with a small and obvious syntax.
 
+h4. The Traditional Approach
+
 The normal mass assignment protection comes from attr_protected and attr_accessible. There are a few problems with this approach:
 
-* Often never implemented, leaving a wide-open system. And once implemented, easy to forget when adding new attributes, leading to bugs (in an attr_accessible system) or security holes (in an attr_protected system).
-* Restricts coding syntax. You can't easily use update_attributes() or attributes= because your whitelist/blacklist gets in your own way.
-* Not contextual. The list of allowed attributes can't change to accomodate different user permissions or situations.
+* *Often never implemented*, leaving a wide-open system. Rails blogs are full of dire warnings about forgetting your attr_protected.
+* Once implemented, *easy to forget* when adding new attributes, leading to *bugs* (in an attr_accessible system) or *security holes* (in an attr_protected system).
+* Restricts coding syntax. You can't easily use update_attributes() or attributes= because *your whitelist/blacklist gets in your own way*.
+* Not contextual. The *list of allowed attributes can't change* to accomodate different user permissions or situations.
 
-This plugin's solution is to let you specify an obvious list of allowed attributes when you mass assign attributes.
+h4. The MassAssignment Approach
 
-* The list of allowed attributes is in your controller at calltime, so it's easier to remember and update (it's not a hidden, magical system).
-* The list of allowed attributes is optional, so it doesn't get in your way.
-* Your controller can easily enforce permissions by evaluating the current user (Admin Controller) or the current situation (creates vs updates).
+This plugin's solution is to let you specify an obvious and explicit list of allowed attributes when you mass assign attributes.
+
+* The list of allowed attributes is in your controller at calltime, so it's *easier to remember and update* (it's not a hidden, magical system).
+* The list of allowed attributes is optional, so it *doesn't get in your way*. You can use update_attributes() and attributes= for your own code again.
+* Assignment *permissions are enforced by the controller*, where permissions belong. You can evaluate the current user or current situation and write the whitelist on the fly.
 
 And as a bonus, permission plugins have a much easier time of things. The list of allowed attributes may be pulled from a permissions table without any awkward User.current class or thread variables.
 
@@ -40,20 +45,11 @@ Let's take a very plausible situation where you would want three separate lists 
 
     def update
       @user = User.find(params[:id])
-      # username is no longer accepted later
-      @user.assign(params[:user], [:email, :password, :password_confirmation])
-      @user.save!
-      ...
-    end
-  end
-
-  class Admin::UsersController < ApplicationController
-    before_filter :admin_required
-
-    def update
-      @user = User.find(params[:id])
-      # admins, on the other hand, may change the username as needed, but may not set passwords
-      @user.assign(:params[:user], [:username, :email])
+      if admin? # admins may edit username and email but not password
+        @user.assign(params[:user], [:username, :email])
+      else      # username isn't editable
+        @user.assign(params[:user], [:email, :password, :password_confirmation])
+      end
       @user.save!
       ...
     end
@@ -64,13 +60,13 @@ If you don't always want to set attribute lists, you may use the mass_assignment
 
 <pre><code>
   class User < ActiveRecord::Base
-    # The boring usage. You may as well specify attributes at calltime.    
+    # The boring usage. You're better off passing attributes to assign() in the controller.
     mass_assignment_policy :only => [:email, :username]
-    
+
     # More interesting. No id fields!
     mass_assignment_policy :except => /_id$/
   end
-  
+
   # Hardcore. Disables mass assignment globally unless overridden!
   ActiveRecord::Base.mass_assignment_policy :except => :all
 </code></pre>
@@ -85,7 +81,7 @@ Nested assignment is supported by passing hashes and arrays for the whitelist.
   class Pirate < ActiveRecord::Base
     accepts_nested_attributes_for :ships
   end
-  
+
   class PiratesController < ApplicationController
     def update
       @pirate = Pirate.find(params[:id])
@@ -114,16 +110,3 @@ Sometimes nested assignment isn't completely appropriate but you still need to a
 </code></pre>
 
 The major benefit here is that the block won't yield unless the params exist, so you don't need to check 'if params[:ship] && params[:ship][:pirate]'.
-
-h3. Feedback
-
-I can think of a couple alternate implementations for this API. Consider:
-
-  @user.assign(params[:user], [:username, :email])
-
-vs
-
-  @user.assign(params[:user], :only => [:username, :email])
-  @user.assign(params[:user], :except => [:admin])
-  
-I personally prefer the former because I think that blacklists are inherently less safe than whitelists, with no compensating advantage. But I'd love to hear some other use cases and get feedback on this! Fork this repo and send pull requests or just contact me (github.com/cainlevy). Let's talk.
