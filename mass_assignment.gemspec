@@ -1,9 +1,8 @@
 $LOAD_PATH << File.dirname(__FILE__) + '/lib'
-require 'mass_assignment'
 
 Gem::Specification.new do |s|
   s.name = 'mass_assignment'
-  s.version = MassAssignment::VERSION
+  s.version = '1.0.1'
   s.authors = ['Lance Ivy']
   s.email = 'lance@cainlevy.net'
   s.homepage = 'http://github.com/cainlevy/mass_assignment'
