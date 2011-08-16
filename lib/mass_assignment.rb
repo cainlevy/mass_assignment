@@ -89,3 +89,5 @@ module MassAssignment
     end
   end
 end
+
+ActiveRecord::Base.class_eval do include MassAssignment end
