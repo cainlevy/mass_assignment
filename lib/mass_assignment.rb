@@ -1,6 +1,11 @@
 module MassAssignment
   def self.included(base)
-    base.class_eval do extend ClassMethods end
+    base.class_eval do
+      class_attribute :assignment_policy, :instance_reader => false, :instance_writer => false
+      def self.mass_assignment_policy(val)
+        self.assignment_policy = val
+      end
+    end
   end
 
   # Basic Example:
@@ -24,27 +29,35 @@ module MassAssignment
   #   @user.save!
   def assign(attributes, allowed_attributes = nil, &block)
     return unless attributes and attributes.is_a? Hash
-  
+
     if allowed_attributes
       safe_attributes = filter_attributes(attributes, :only => allowed_attributes)
       yield attributes if block_given?
-      self.send("attributes=", safe_attributes, false)
+      mass_assign_safe_attributes(safe_attributes)
     else
-      if policy = self.class.get_mass_assignment_policy
+      if policy = self.class.assignment_policy
         safe_attributes = filter_attributes(attributes, policy)
-        self.send("attributes=", safe_attributes, false)
+        mass_assign_safe_attributes(safe_attributes)
       else
-        # backwards compatibility. use attr_protected and attr_accessible.
+        # fall back on Rails' system
         self.attributes = attributes
       end
     end
   end
-  
+
   private
+
+  def mass_assign_safe_attributes(safe_attributes)
+    if respond_to?(:assign_attributes)
+      assign_attributes(safe_attributes, :without_protection => true)
+    else
+      self.send("attributes=", safe_attributes, false)
+    end
+  end
 
   def filter_attributes(attributes, options = {}) # could surely be refactored.
     attributes = attributes.stringify_keys
-  
+
     if options[:only]
       if options[:only].is_a? Regexp
         attributes.reject { |k, v| !k.gsub(/\(.+/, "").match(options[:only]) }
@@ -71,19 +84,6 @@ module MassAssignment
       end
     else
       attributes
-    end
-  end
-  
-  module ClassMethods
-    # sets a default mass assignment policy for your model's attributes. you may choose to start from a
-    # closed state that allows no mass assignment, an open state that allows any mass assignment (this is
-    # activerecord's default), or somewhere inbetween.
-    def mass_assignment_policy(val)
-      write_inheritable_attribute :mass_assignment_policy, val
-    end
-    
-    def get_mass_assignment_policy
-      read_inheritable_attribute :mass_assignment_policy
     end
   end
 end
